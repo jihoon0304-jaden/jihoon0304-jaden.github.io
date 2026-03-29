@@ -188,6 +188,8 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
     </div>
   </div>
 
+  <div id="noticeBanner" style="display:none;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;font-size:13px;font-weight:600;color:#fff;cursor:pointer" onclick="this.style.display='none'"></div>
+  <div id="bannerTop" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden"></div>
   <div id="syncStatus" class="sync-bar">⏳ 데이터 로딩중...</div>
   <div id="matchAlert"></div>
 
@@ -210,7 +212,8 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
   </div>
 
   <div id="recommendResult"></div>
-
+<div id="bannerMiddle" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden"></div>
+ 
   <div class="card">
     <div class="card-title collapsible" onclick="toggleSection('myNumBody',this)"><span class="icon">💾</span> 내 저장 번호</div>
     <div id="myNumBody" class="collapse-body open">
@@ -239,6 +242,7 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
     </div>
   </div>
 
+ <div id="bannerBottom" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden"></div>
   <div class="footer">AI 로또 분석기 v5.0<br>과거 데이터 패턴 기반 분석 · 당첨을 보장하지 않습니다</div>
 </div>
 
@@ -324,6 +328,7 @@ async function loadFirebase(){
     });
 
     loadFromFirebase();
+     loadNoticeAndBanner();
   } catch(e){
     console.log('Firebase 로드 실패 (오프라인 모드):', e.message);
     document.getElementById('syncStatus').textContent='⚠️ 오프라인 모드 (로컬 데이터만 사용)';
@@ -977,6 +982,43 @@ function refreshAll(){
   showHotNumbers();
   showRecentData();
 }
+// ============ 공지사항 & 배너 로드 ============
+async function loadNoticeAndBanner(){
+  if(!firebaseLoaded) return;
+  try{
+    var fsMod=await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+    // 공지사항
+    var noticeSnap=await fsMod.getDoc(window.fb.doc(window.fb.db,'settings','notice'));
+    if(noticeSnap.exists()){
+      var n=noticeSnap.data();
+      if(n.active && n.text){
+        var el=document.getElementById('noticeBanner');
+        el.style.display='block';
+        el.style.background=n.bg||'#667eea';
+        el.innerHTML='📢 '+n.text+' <span style="font-size:10px;opacity:0.7;margin-left:8px">✕</span>';
+      }
+    }
+    // 배너
+    var bannerSnap=await fsMod.getDoc(window.fb.doc(window.fb.db,'settings','banner'));
+    if(bannerSnap.exists()){
+      var b=bannerSnap.data();
+      if(b.active && b.image){
+        var pos=b.position||'top';
+        var targetId='banner'+pos.charAt(0).toUpperCase()+pos.slice(1);
+        var el=document.getElementById(targetId);
+        if(el){
+          var html='';
+          if(b.link) html+='<a href="'+b.link+'" target="_blank">';
+          html+='<img src="'+b.image+'" style="width:100%;display:block;border-radius:12px">';
+          if(b.link) html+='</a>';
+          el.innerHTML=html;
+          el.style.display='block';
+        }
+      }
+    }
+  }catch(e){console.log('공지/배너 로드 실패:',e);}
+}
+
 
 // ============ 시작 ============
 initData();
