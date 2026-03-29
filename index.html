@@ -131,6 +131,97 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
 .sync-bar{text-align:center;font-size:11px;color:#888;margin-bottom:8px}
 .footer{text-align:center;color:#555;font-size:11px;padding:20px 0;line-height:1.6}
 .loading{text-align:center;padding:20px;color:#888;font-size:13px}
+/* ===== 공지사항 효과 ===== */
+@keyframes noticeGlow {
+  0% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
+  50% { box-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,165,0,0.4); }
+  100% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
+}
+@keyframes noticeSlideIn {
+  0% { transform: translateY(-30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes noticePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+@keyframes noticeTextScroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+@keyframes bellShake {
+  0% { transform: rotate(0); }
+  15% { transform: rotate(15deg); }
+  30% { transform: rotate(-15deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-10deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0); }
+}
+
+#noticeBanner {
+  animation: noticeSlideIn 0.6s ease-out, noticeGlow 2s ease-in-out infinite !important;
+  border: 2px solid rgba(255,215,0,0.6) !important;
+  border-radius: 12px !important;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+#noticeBanner:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 30px rgba(255,215,0,1), 0 0 60px rgba(255,165,0,0.6) !important;
+}
+
+/* 반짝이 배경 효과 */
+#noticeBanner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+  animation: noticeShine 3s ease-in-out infinite;
+}
+@keyframes noticeShine {
+  0% { transform: translateX(-100%) translateY(-100%); }
+  100% { transform: translateX(100%) translateY(100%); }
+}
+
+.notice-bell {
+  display: inline-block;
+  animation: bellShake 1s ease-in-out infinite;
+  font-size: 1.3em;
+}
+
+.notice-text-wrap {
+  font-weight: bold;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+/* 긴 공지일 때 흐르는 효과 (선택) */
+.notice-scroll {
+  display: inline-block;
+  white-space: nowrap;
+  animation: noticeTextScroll 12s linear infinite;
+}
+
+.notice-new-badge {
+  display: inline-block;
+  background: #ff3b3b;
+  color: #fff;
+  font-size: 0.7em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  animation: noticePulse 1s ease-in-out infinite;
+  vertical-align: middle;
+}
+
 </style>
 </head>
 <body>
@@ -995,7 +1086,17 @@ async function loadNoticeAndBanner(){
         var el=document.getElementById('noticeBanner');
         el.style.display='block';
         el.style.background=n.bg||'#667eea';
-        el.innerHTML='📢 '+n.text+' <span style="font-size:10px;opacity:0.7;margin-left:8px">✕</span>';
+        var isLong = n.text.length > 30;
+el.innerHTML =
+  '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;position:relative;z-index:1;">' +
+    '<span class="notice-bell">🔔</span>' +
+    '<span class="notice-text-wrap">' +
+      (isLong ? '<span class="notice-scroll">' + n.text + '</span>' : n.text) +
+    '</span>' +
+    '<span class="notice-new-badge">NEW</span>' +
+    '<span style="font-size:10px;opacity:0.7;margin-left:8px;cursor:pointer">✕</span>' +
+  '</div>';
+
       }
     }
     // 배너
