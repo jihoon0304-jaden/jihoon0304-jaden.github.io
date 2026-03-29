@@ -106,6 +106,7 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
     <div class="tab-btn" onclick="showTab('numbers')">🔢 번호분석</div>
     <div class="tab-btn" onclick="showTab('growth')">📈 성장추이</div>
     <div class="tab-btn" onclick="showTab('backup')">💾 백업</div>
+    <div class="tab-btn" onclick="showTab('notice')">📢 공지/배너</div>
   </div>
 
   <!-- ====== 전체 현황 ====== -->
@@ -275,6 +276,81 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
     </div>
   </div>
 
+    <!-- ====== 공지/배너 관리 ====== -->
+  <div id="tab-notice" style="display:none">
+    <div class="card">
+      <div class="card-title"><span class="icon">📢</span> 공지사항 관리</div>
+      <div class="input-group">
+        <label>공지 내용 (비우면 공지 숨김)</label>
+        <textarea id="noticeText" style="width:100%;height:80px;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#eee;font-size:13px;resize:vertical" placeholder="예: 이번 주 AI 추천 적중률 12.3%! 많은 참여 부탁드립니다."></textarea>
+      </div>
+      <div class="input-group">
+        <label>공지 배경색</label>
+        <div class="input-row">
+          <button class="btn btn-sm" style="background:#667eea;color:#fff" onclick="document.getElementById('noticeBg').value='#667eea'">보라</button>
+          <button class="btn btn-sm" style="background:#ef4444;color:#fff" onclick="document.getElementById('noticeBg').value='#ef4444'">빨강</button>
+          <button class="btn btn-sm" style="background:#10b981;color:#fff" onclick="document.getElementById('noticeBg').value='#10b981'">초록</button>
+          <button class="btn btn-sm" style="background:#f59e0b;color:#000" onclick="document.getElementById('noticeBg').value='#f59e0b'">노랑</button>
+          <input type="text" id="noticeBg" value="#667eea" style="width:80px;padding:8px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#eee;font-size:12px">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-blue" onclick="saveNotice()">💾 공지 저장</button>
+        <button class="btn btn-red" onclick="deleteNotice()">🗑️ 공지 삭제</button>
+      </div>
+      <div id="noticeMsg"></div>
+      <div style="margin-top:12px;font-size:11px;color:#888">현재 공지:</div>
+      <div id="currentNotice" style="margin-top:4px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🖼️</span> 배너 광고 관리</div>
+      <div class="input-group">
+        <label>배너 이미지 URL</label>
+        <input type="text" id="bannerImage" style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#eee;font-size:13px" placeholder="https://jihoon0304-jaden.github.io/banner1.jpg">
+      </div>
+      <div class="input-group">
+        <label>클릭 시 이동할 링크 (없으면 비워두세요)</label>
+        <input type="text" id="bannerLink" style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#eee;font-size:13px" placeholder="https://example.com">
+      </div>
+      <div class="input-group">
+        <label>배너 위치</label>
+        <div class="input-row">
+          <button class="btn btn-sm btn-blue" onclick="document.getElementById('bannerPosition').value='top'" id="posTop">상단</button>
+          <button class="btn btn-sm btn-gray" onclick="document.getElementById('bannerPosition').value='middle'" id="posMiddle">중간</button>
+          <button class="btn btn-sm btn-gray" onclick="document.getElementById('bannerPosition').value='bottom'" id="posBottom">하단</button>
+          <input type="hidden" id="bannerPosition" value="top">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>배너 표시 여부</label>
+        <div class="input-row">
+          <button class="btn btn-sm btn-green" onclick="document.getElementById('bannerActive').value='true'">켜기</button>
+          <button class="btn btn-sm btn-red" onclick="document.getElementById('bannerActive').value='false'">끄기</button>
+          <input type="hidden" id="bannerActive" value="true">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-blue" onclick="saveBanner()">💾 배너 저장</button>
+        <button class="btn btn-red" onclick="deleteBanner()">🗑️ 배너 삭제</button>
+      </div>
+      <div id="bannerMsg"></div>
+      <div style="margin-top:12px;font-size:11px;color:#888">미리보기:</div>
+      <div id="bannerPreview" style="margin-top:4px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📋</span> 이미지 업로드 방법</div>
+      <div style="font-size:12px;color:#888;line-height:1.8">
+        <p>1. GitHub 저장소에 이미지 파일 업로드</p>
+        <p style="color:#667eea">   → https://jihoon0304-jaden.github.io/파일명.jpg</p>
+        <p>2. 또는 imgur.com 에 이미지 업로드 후 URL 복사</p>
+        <p>3. 위 배너 이미지 URL에 붙여넣기</p>
+        <p style="margin-top:8px;color:#fbbf24">권장 이미지 크기: 가로 500px, 세로 100~150px</p>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">AI 로또 분석기 관리자 v6.0</div>
 </div>
 </div>
@@ -302,7 +378,7 @@ function checkAdminPw(){
 
 // ============ 탭 전환 ============
 function showTab(name){
-  var tabs=['overview','draw','winners','users','patterns','numbers','growth','backup'];
+  var tabs=['overview','draw','winners','users','patterns','numbers','growth','backup','notice'];
   for(var i=0;i<tabs.length;i++){
     document.getElementById('tab-'+tabs[i]).style.display = (tabs[i]===name)?'block':'none';
   }
@@ -1011,9 +1087,105 @@ function toggleSection(id,titleEl){
   document.getElementById(id).classList.toggle('open');
   if(titleEl)titleEl.classList.toggle('open');
 }
+// ============ 공지사항 관리 ============
+async function saveNotice(){
+  var text=document.getElementById('noticeText').value.trim();
+  var bg=document.getElementById('noticeBg').value||'#667eea';
+  if(!text){showMsg('noticeMsg','error','공지 내용을 입력하세요');return;}
+  var data={text:text,bg:bg,updatedAt:new Date().toISOString(),active:true};
+  if(firebaseLoaded){
+    await window.fb.setDoc(window.fb.doc(window.fb.db,'settings','notice'),data);
+    showMsg('noticeMsg','success','공지사항 저장 완료!');
+    loadCurrentNotice();
+  } else {
+    showMsg('noticeMsg','error','Firebase 연결 안됨');
+  }
+}
+
+async function deleteNotice(){
+  if(!confirm('공지를 삭제할까요?'))return;
+  if(firebaseLoaded){
+    await window.fb.setDoc(window.fb.doc(window.fb.db,'settings','notice'),{active:false,text:'',updatedAt:new Date().toISOString()});
+    showMsg('noticeMsg','success','공지 삭제됨');
+    document.getElementById('noticeText').value='';
+    loadCurrentNotice();
+  }
+}
+
+async function loadCurrentNotice(){
+  if(!firebaseLoaded)return;
+  try{
+    var fsMod=await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+    var docSnap=await fsMod.getDoc(window.fb.doc(window.fb.db,'settings','notice'));
+    if(docSnap.exists()){
+      var d=docSnap.data();
+      if(d.active && d.text){
+        document.getElementById('currentNotice').innerHTML='<div style="background:'+d.bg+';color:#fff;padding:10px;border-radius:8px;font-size:12px">'+d.text+'</div><div style="font-size:10px;color:#666;margin-top:4px">수정: '+d.updatedAt+'</div>';
+        document.getElementById('noticeText').value=d.text;
+        document.getElementById('noticeBg').value=d.bg;
+      } else {
+        document.getElementById('currentNotice').innerHTML='<span style="color:#666;font-size:12px">공지 없음</span>';
+      }
+    }
+  }catch(e){console.log('공지 로드 실패:',e);}
+}
+
+// ============ 배너 관리 ============
+async function saveBanner(){
+  var image=document.getElementById('bannerImage').value.trim();
+  var link=document.getElementById('bannerLink').value.trim();
+  var position=document.getElementById('bannerPosition').value||'top';
+  var active=document.getElementById('bannerActive').value==='true';
+  if(!image){showMsg('bannerMsg','error','이미지 URL을 입력하세요');return;}
+  var data={image:image,link:link,position:position,active:active,updatedAt:new Date().toISOString()};
+  if(firebaseLoaded){
+    await window.fb.setDoc(window.fb.doc(window.fb.db,'settings','banner'),data);
+    showMsg('bannerMsg','success','배너 저장 완료!');
+    loadCurrentBanner();
+  } else {
+    showMsg('bannerMsg','error','Firebase 연결 안됨');
+  }
+}
+
+async function deleteBanner(){
+  if(!confirm('배너를 삭제할까요?'))return;
+  if(firebaseLoaded){
+    await window.fb.setDoc(window.fb.doc(window.fb.db,'settings','banner'),{active:false,image:'',updatedAt:new Date().toISOString()});
+    showMsg('bannerMsg','success','배너 삭제됨');
+    document.getElementById('bannerImage').value='';
+    document.getElementById('bannerLink').value='';
+    loadCurrentBanner();
+  }
+}
+
+async function loadCurrentBanner(){
+  if(!firebaseLoaded)return;
+  try{
+    var fsMod=await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+    var docSnap=await fsMod.getDoc(window.fb.doc(window.fb.db,'settings','banner'));
+    if(docSnap.exists()){
+      var d=docSnap.data();
+      if(d.active && d.image){
+        var html='<div style="border-radius:8px;overflow:hidden;border:1px solid #333">';
+        if(d.link) html+='<a href="'+d.link+'" target="_blank">';
+        html+='<img src="'+d.image+'" style="width:100%;display:block">';
+        if(d.link) html+='</a>';
+        html+='</div><div style="font-size:10px;color:#666;margin-top:4px">위치: '+d.position+' · 수정: '+d.updatedAt+'</div>';
+        document.getElementById('bannerPreview').innerHTML=html;
+        document.getElementById('bannerImage').value=d.image;
+        document.getElementById('bannerLink').value=d.link||'';
+        document.getElementById('bannerPosition').value=d.position||'top';
+      } else {
+        document.getElementById('bannerPreview').innerHTML='<span style="color:#666;font-size:12px">배너 없음</span>';
+      }
+    }
+  }catch(e){console.log('배너 로드 실패:',e);}
+}
 
 // ============ 전체 새로고침 ============
 function refreshAll(){
+  loadCurrentNotice();
+  loadCurrentBanner();
   showDashboard();
   showWinSummary();
   showHighlights();
