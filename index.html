@@ -1043,7 +1043,7 @@ function showResult(nums,info,isAI){
   var ballsStr='';for(var i=0;i<numsSorted.length;i++){ballsStr+=ballHTML(numsSorted[i]);}
   var gradeLabel=isAI?'🤖 AI 최적 추천':'🎯 '+info.grade+'등급 추천';
   var numsStr=numsSorted.join(',');
-  var html='<div class="result-card"><div class="result-title">'+gradeLabel+' ('+info.found.count+'회 출현 패턴)</div><div class="result-balls">'+ballsStr+'</div><div style="text-align:center;margin-bottom:8px"><span class="result-badge grade-'+info.grade+'" style="font-size:12px">'+info.grade+'등급</span><span class="result-badge">5등 '+info.m3+'회</span><span class="result-badge">4등 '+info.m4+'회</span><span class="result-badge">3등 '+info.m5+'회</span></div><span class="result-badge green">✅ 과거 1등 당첨번호와 중복 없음</span><div class="result-proof"><div style="font-size:12px;color:#888;margin-bottom:6px">📋 근거 (상위 '+topProofs.length+'건)</div>'+proofHTML+'</div><div class="result-actions"><button class="btn btn-save" onclick="saveMyNumber(['+numsStr+'],\''+info.grade+'\',\''+info.key.replace(/'/g,"\\'")+'\')">💾 저장</button><button class="btn btn-retry" onclick="selectGrade(\''+(isAI?'AI':info.grade)+'\')">🔄 다시 생성</button></div><button onclick="window.open(\'https://www.dhlottery.co.kr/\',\'_blank\')" style="margin-top:10px;padding:12px 20px;background:linear-gradient(135deg,#0066cc,#0052a3);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;width:100%;">🎰 동행복권에서 바로 구매하기</button></div>';
+var html='<div class="result-card"><div class="result-title">'+gradeLabel+' ('+info.found.count+'회 출현 패턴)</div><div class="result-balls">'+ballsStr+'</div><div style="text-align:center;margin-bottom:8px"><span class="result-badge grade-'+info.grade+'" style="font-size:12px">'+info.grade+'등급</span><span class="result-badge">5등 '+info.m3+'회</span><span class="result-badge">4등 '+info.m4+'회</span><span class="result-badge">3등 '+info.m5+'회</span></div><span class="result-badge green">✅ 과거 1등 당첨번호와 중복 없음</span><div class="result-proof"><div style="font-size:12px;color:#888;margin-bottom:6px">📋 근거 (상위 '+topProofs.length+'건)</div>'+proofHTML+'</div><div class="result-actions"><button class="btn btn-save" onclick="saveMyNumber(['+numsStr+'],\''+info.grade+'\',\''+info.key.replace(/'/g,"\\'")+'\')">💾 저장</button><button class="btn btn-retry" onclick="selectGrade(\''+(isAI?'AI':info.grade)+'\')">🔄 다시 생성</button></div><button onclick="shareKakao(['+numsStr+'],\''+info.grade+'\')" style="margin-top:10px;padding:12px 20px;background:#FEE500;border:none;border-radius:10px;color:#000;font-size:14px;font-weight:bold;cursor:pointer;width:100%;">💬 카카오톡으로 공유하기</button><button onclick="window.open(\'https://www.dhlottery.co.kr/\',\'_blank\')" style="margin-top:8px;padding:12px 20px;background:linear-gradient(135deg,#0066cc,#0052a3);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;width:100%;">🎰 동행복권에서 바로 구매하기</button></div>';
 document.getElementById('recommendResult').innerHTML=html;
 document.getElementById('recommendResult').scrollIntoView({behavior:'smooth',block:'center'});
 }
@@ -1390,6 +1390,36 @@ function launchFireworks(){
       }, idx * 500);
     })(i);
   }
+}
+ // ===== 카카오톡 공유 =====
+function shareKakao(nums, grade){
+  if(!kakaoLoaded){
+    showToast('카카오 SDK 로딩중입니다. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+  var numsStr = nums.join(', ');
+  var nextRound = allData.length > 0 ? allData[allData.length-1].round + 1 : '???';
+  Kakao.Share.sendDefault({
+    objectType: 'feed',
+    content: {
+      title: '🎱 AI 로또 추천번호 (' + grade + '등급)',
+      description: '제 ' + nextRound + '회 추천: ' + numsStr + '\n\nAI가 과거 당첨 패턴을 분석해서 추천한 번호입니다!',
+      imageUrl: 'https://jihoon0304-jaden.github.io/og-image.png',
+      link: {
+        mobileWebUrl: 'https://jihoon0304-jaden.github.io/',
+        webUrl: 'https://jihoon0304-jaden.github.io/'
+      }
+    },
+    buttons: [
+      {
+        title: '나도 번호 받기',
+        link: {
+          mobileWebUrl: 'https://jihoon0304-jaden.github.io/',
+          webUrl: 'https://jihoon0304-jaden.github.io/'
+        }
+      }
+    ]
+  });
 }
 // ===== 마감 카운트다운 =====
 function updateCountdown(){
