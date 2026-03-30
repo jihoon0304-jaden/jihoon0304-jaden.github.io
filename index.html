@@ -1052,7 +1052,9 @@ document.getElementById('recommendResult').scrollIntoView({behavior:'smooth',blo
 // ============ 내 번호 저장 ============
 function saveMyNumber(nums,grade,patternKey){
 if(!currentUserInfo){
-  document.getElementById('recommendResult').innerHTML += '<div style="margin-top:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #667eea;border-radius:12px;padding:16px;text-align:center"><div style="font-size:14px;font-weight:bold;color:#fff;margin-bottom:8px">💾 번호를 저장하고 싶으신가요?</div><div style="font-size:12px;color:#a78bfa;line-height:1.6;margin-bottom:12px">로그인하시면 이런 기능을 이용할 수 있어요!<br>✅ 생성한 번호 저장 및 관리<br>✅ 당첨 여부 자동 확인<br>✅ 당첨 시 축하 알림</div><button onclick="openLoginModal()" style="padding:10px 24px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer">🔑 3초만에 로그인하기</button></div>';
+  document.getElementById('loginModal').classList.add('show');
+  document.getElementById('loginMsg').textContent='번호를 저장하려면 로그인이 필요해요! 로그인하면 당첨 여부도 자동 확인해드려요 🎯';
+  document.getElementById('loginMsg').style.color='#a78bfa';
   return;
 }
   var now=new Date();
