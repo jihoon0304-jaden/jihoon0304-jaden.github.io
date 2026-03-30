@@ -221,6 +221,131 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
   animation: noticePulse 1s ease-in-out infinite;
   vertical-align: middle;
 }
+/* ===== 당첨 축하 효과 ===== */
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+@keyframes popupZoom {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes firework {
+  0% { transform: scale(0); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(0); opacity: 0; }
+}
+@keyframes shineText {
+  0% { background-position: -200%; }
+  100% { background-position: 200%; }
+}
+
+#winCelebrate {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 99999;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+}
+#winCelebrate.show { display: flex; }
+
+.confetti-piece {
+  position: fixed;
+  top: -20px;
+  width: 10px;
+  height: 20px;
+  border-radius: 3px;
+  animation: confettiFall linear forwards;
+  z-index: 100000;
+}
+
+.win-popup {
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  border: 3px solid gold;
+  border-radius: 20px;
+  padding: 40px 30px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  animation: popupZoom 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(255,215,0,0.5), 0 0 80px rgba(255,215,0,0.2);
+}
+.win-popup::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,215,0,0.08) 50%, transparent 60%);
+  animation: noticeShine 2s ease-in-out infinite;
+}
+
+.win-trophy { font-size: 60px; margin-bottom: 10px; }
+.win-title {
+  font-size: 28px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ffd700, #ffaa00, #ffd700, #fff, #ffd700);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shineText 2s linear infinite;
+  margin: 10px 0;
+}
+.win-rank { font-size: 50px; font-weight: bold; color: #ffd700; margin: 15px 0; }
+.win-detail {
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: left;
+  color: #ddd;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.win-detail b { color: #ffd700; }
+.win-numbers {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 15px 0;
+}
+.win-ball {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #000;
+  font-weight: bold;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+.win-close-btn {
+  margin-top: 20px;
+  padding: 12px 40px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  border: none;
+  border-radius: 25px;
+  color: #000;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+.win-close-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,215,0,0.8); }
+
+.firework-circle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 100001;
+}
 
 </style>
 </head>
