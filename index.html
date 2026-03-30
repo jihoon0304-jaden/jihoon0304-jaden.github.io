@@ -433,7 +433,13 @@ body{font-family:-apple-system,'Malgun Gothic',sans-serif;background:#0a0a1a;col
   </div>
 
   <div id="recommendResult"></div>
-<div id="bannerMiddle" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden"></div>
+<div class="card">
+  <div class="card-title collapsible" onclick="toggleSection('historyBody',this)"><span class="icon">📈</span> 내 적중 히스토리 & AI 리포트</div>
+  <div id="historyBody" class="collapse-body">
+    <div id="hitHistory"></div>
+  </div>
+</div>
+ <div id="bannerMiddle" style="display:none;margin-bottom:12px;border-radius:12px;overflow:hidden"></div>
  
   <div class="card">
     <div class="card-title collapsible" onclick="toggleSection('myNumBody',this)"><span class="icon">💾</span> 내 저장 번호</div>
@@ -1221,6 +1227,7 @@ function refreshAll(){
   showPatternAnalysis();
   showHotNumbers();
   showRecentData();
+ showHitHistory();
 }
 // ============ 공지사항 & 배너 로드 ============
 async function loadNoticeAndBanner(){
@@ -1393,6 +1400,155 @@ function launchFireworks(){
     })(i);
   }
 }
+ // ===== 적중 히스토리 & AI 리포트 =====
+function showHitHistory(){
+  var el = document.getElementById('hitHistory');
+  if(!el) return;
+
+  // AI 적중률 리포트 (전체 데이터 기반)
+  var totalChecked = 0;
+  var rankCount = {3:0, 4:0, 5:0};
+  var weeklyData = [];
+
+  for(var i=0; i<myNumbers.length; i++){
+    var mn = myNumbers[i];
+    if(!mn.numbers) continue;
+    var targetRound = mn.targetRound || mn.savedAtRound + 1 || 0;
+    var drawData = null;
+    for(var j=0; j<allData.length; j++){
+      if(allData[j].round === targetRound){ drawData = allData[j]; break; }
+    }
+    if(!drawData) continue;
+    totalChecked++;
+    var matched = 0;
+    for(var k=0; k<mn.numbers.length; k++){
+      for(var l=0; l<drawData.numbers.length; l++){
+        if(mn.numbers[k] === drawData.numbers[l]) matched++;
+      }
+    }
+    var bonusMatch = false;
+    for(var k=0; k<mn.numbers.length; k++){
+      if(mn.numbers[k] === drawData.bonus) bonusMatch = true;
+    }
+    var rank = 0;
+    if(matched === 6) rank = 1;
+    else if(matched === 5 && bonusMatch) rank = 2;
+    else if(matched === 5) rank = 3;
+    else if(matched === 4) rank = 4;
+    else if(matched === 3) rank = 5;
+
+    if(rank >= 3 && rank <= 5) rankCount[rank]++;
+
+    weeklyData.push({
+      round: targetRound,
+      matched: matched,
+      rank: rank,
+      grade: mn.grade || '-',
+      date: mn.date || ''
+    });
+  }
+
+  weeklyData.sort(function(a,b){ return b.round - a.round; });
+  var recentWeeks = weeklyData.slice(0, 20);
+
+  // AI 전체 적중률 (패턴 기반)
+  var patternTotal = 0;
+  var patternHit = {3:0, 4:0, 5:0};
+  for(var i=10; i<allData.length; i++){
+    var current = allData[i].numbers.slice().sort(function(a,b){return a-b});
+    for(var j=0; j<i; j++){
+      var past = allData[j].numbers.slice().sort(function(a,b){return a-b});
+      var mm = 0;
+      for(var k=0; k<current.length; k++){
+        for(var l=0; l<past.length; l++){
+          if(current[k]===past[l]) mm++;
+        }
+      }
+      if(mm >= 3){
+        patternTotal++;
+        if(mm === 3) patternHit[5]++;
+        else if(mm === 4) patternHit[4]++;
+        else if(mm >= 5) patternHit[3]++;
+        break;
+      }
+    }
+  }
+
+  var html = '';
+
+  // AI 적중률 리포트 섹션
+  html += '<div style="background:#1a1a2e;border-radius:12px;padding:14px;margin-bottom:12px">';
+  html += '<div style="font-size:14px;font-weight:bold;color:#fff;margin-bottom:10px">🤖 AI 적중률 리포트</div>';
+  html += '<div style="font-size:11px;color:#888;margin-bottom:10px">과거 당첨 패턴 분석 기반 검증 결과</div>';
+
+  var aiStats = [
+    {label: '3등 (5개 일치)', count: patternHit[3], color: '#ef4444'},
+    {label: '4등 (4개 일치)', count: patternHit[4], color: '#f59e0b'},
+    {label: '5등 (3개 일치)', count: patternHit[5], color: '#10b981'}
+  ];
+
+  for(var i=0; i<aiStats.length; i++){
+    var s = aiStats[i];
+    var pct = patternTotal > 0 ? (s.count / patternTotal * 100).toFixed(1) : 0;
+    html += '<div style="margin-bottom:8px">';
+    html += '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:#ccc">' + s.label + '</span><span style="color:' + s.color + '">' + s.count + '회 (' + pct + '%)</span></div>';
+    html += '<div style="background:#0a0a1a;border-radius:4px;height:8px;overflow:hidden"><div style="background:' + s.color + ';height:100%;width:' + Math.min(pct * 2, 100) + '%;border-radius:4px;transition:width 0.5s"></div></div>';
+    html += '</div>';
+  }
+
+  html += '<div style="text-align:center;margin-top:10px;padding:8px;background:#0a0a1a;border-radius:8px;font-size:11px;color:#888">총 분석 패턴 <span style="color:#667eea;font-weight:bold">' + patternTotal + '</span>건 중 적중 <span style="color:#fbbf24;font-weight:bold">' + (patternHit[3]+patternHit[4]+patternHit[5]) + '</span>건</div>';
+  html += '</div>';
+
+  // 내 적중 히스토리 섹션
+  if(!currentUserInfo){
+    html += '<div style="text-align:center;padding:20px;color:#888;font-size:12px">로그인하면 내 번호의 회차별 적중 히스토리를 확인할 수 있어요!</div>';
+  } else if(recentWeeks.length === 0){
+    html += '<div style="text-align:center;padding:20px;color:#888;font-size:12px">아직 적중 기록이 없어요. 번호를 저장하고 추첨 결과를 기다려보세요!</div>';
+  } else {
+    html += '<div style="background:#1a1a2e;border-radius:12px;padding:14px;margin-bottom:12px">';
+    html += '<div style="font-size:14px;font-weight:bold;color:#fff;margin-bottom:10px">📊 내 적중 히스토리</div>';
+
+    // 막대 그래프
+    html += '<div style="display:flex;align-items:flex-end;gap:3px;height:100px;margin-bottom:10px;padding:0 4px">';
+    var graphData = recentWeeks.slice(0, 10).reverse();
+    for(var i=0; i<graphData.length; i++){
+      var w = graphData[i];
+      var barH = w.matched * 16;
+      var barColor = w.matched >= 5 ? '#ef4444' : w.matched >= 4 ? '#f59e0b' : w.matched >= 3 ? '#10b981' : '#333';
+      html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center">';
+      html += '<div style="font-size:9px;color:#888;margin-bottom:2px">' + w.matched + '개</div>';
+      html += '<div style="width:100%;height:' + Math.max(barH, 4) + 'px;background:' + barColor + ';border-radius:4px 4px 0 0;transition:height 0.3s"></div>';
+      html += '<div style="font-size:8px;color:#555;margin-top:2px">' + w.round + '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // 상세 리스트
+    html += '<div style="font-size:11px;color:#888;margin-bottom:6px">최근 기록 (최대 20건)</div>';
+    for(var i=0; i<recentWeeks.length; i++){
+      var w = recentWeeks[i];
+      var rankText = w.rank > 0 ? w.rank + '등 🎉' : w.matched + '개 일치';
+      var rankColor = w.rank > 0 ? '#fbbf24' : (w.matched >= 3 ? '#10b981' : '#888');
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#0a0a1a;border-radius:6px;margin-bottom:4px">';
+      html += '<span style="color:#667eea;font-size:11px;font-weight:bold">' + w.round + '회</span>';
+      html += '<span style="color:#888;font-size:10px">' + w.grade + '등급</span>';
+      html += '<span style="color:' + rankColor + ';font-size:11px;font-weight:bold">' + rankText + '</span>';
+      html += '</div>';
+    }
+
+    // 요약
+    var totalHits = rankCount[3] + rankCount[4] + rankCount[5];
+    html += '<div style="display:flex;gap:8px;margin-top:10px">';
+    html += '<div style="flex:1;text-align:center;padding:8px;background:#0a0a1a;border-radius:8px"><div style="font-size:16px;font-weight:800;color:#667eea">' + totalChecked + '</div><div style="font-size:9px;color:#888">총 확인</div></div>';
+    html += '<div style="flex:1;text-align:center;padding:8px;background:#0a0a1a;border-radius:8px"><div style="font-size:16px;font-weight:800;color:#fbbf24">' + totalHits + '</div><div style="font-size:9px;color:#888">적중</div></div>';
+    html += '<div style="flex:1;text-align:center;padding:8px;background:#0a0a1a;border-radius:8px"><div style="font-size:16px;font-weight:800;color:#10b981">' + (totalChecked > 0 ? (totalHits/totalChecked*100).toFixed(1) : 0) + '%</div><div style="font-size:9px;color:#888">적중률</div></div>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  el.innerHTML = html;
+}
+
  // ===== 카카오톡 공유 =====
 function shareKakao(nums, grade){
   if(!kakaoLoaded){
